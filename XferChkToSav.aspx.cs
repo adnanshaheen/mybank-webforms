@@ -16,7 +16,7 @@ public partial class XferChkToSav : System.Web.UI.Page
         }
 
         IBusinessAccount iba = GenericFactory<BusinessLayer, IBusinessAccount>.CreateInstance();
-         string chkAcctNum = SessionFacade.CHECKINGACCTNUM;
+        string chkAcctNum = SessionFacade.CHECKINGACCTNUM;
         string savAcctNum = chkAcctNum + "1";
         lblCheckingBalance.Text = iba.GetCheckingBalance(chkAcctNum).ToString();
         lblSavingBalance.Text = iba.GetSavingBalance(savAcctNum).ToString();

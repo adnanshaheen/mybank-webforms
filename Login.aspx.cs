@@ -19,8 +19,6 @@ public partial class Login : System.Web.UI.Page
         {
             string chkAcctNum = iau.IsValidUser(Utils.StripPunctuation(txtUsername.Text), 
                 Utils.StripPunctuation(txtPassword.Text));
-          //  string chkAcctNum = iau.IsValidUser(txtUsername.Text,
-          //      txtPassword.Text); 
             
             if (chkAcctNum != "")
             {
