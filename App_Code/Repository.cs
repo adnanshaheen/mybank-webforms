@@ -210,6 +210,30 @@ public class Repository : IRepositoryDataAuthentication, IRepositoryDataAccount
 
     public bool UpdatePassword(string uname, string oldPW, string newPW)
     {
-        throw new NotImplementedException();
-    }
+        string res = "";
+        try
+        {
+            res = IsValidUser(uname, oldPW);
+            string sql = "update Users set Password=@newPW where " +
+                "Username=@uname and Password=@oldPW";
+            List<SqlParameter> PList = new List<SqlParameter>();
+            SqlParameter p1 = new SqlParameter("@uname", SqlDbType.VarChar, 50);
+            p1.Value = uname;
+            PList.Add(p1);
+            SqlParameter p2 = new SqlParameter("@oldPW", SqlDbType.VarChar, 50);
+            p2.Value = oldPW;
+            PList.Add(p2);
+            SqlParameter p3 = new SqlParameter("@newPW", SqlDbType.VarChar, 50);
+            p3.Value = newPW;
+            PList.Add(p3);
+            object obj = _idataAccess.GetSingleAnswer(sql, PList);
+            if (obj != null)
+                res = obj.ToString();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        return true;
+   }
 }

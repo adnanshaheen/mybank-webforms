@@ -41,7 +41,16 @@ public class BusinessLayer : IBusinessAuthentication, IBusinessAccount
 
     public bool ChangePassword(string uname, string oldpwd, string newpwd)
     {
-        throw new NotImplementedException();
+        bool res = false;
+        try
+        {
+            res = idau.UpdatePassword(uname, oldpwd, newpwd);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+        return res;
     }
 
     #endregion

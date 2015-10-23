@@ -9,15 +9,21 @@
             <td>&nbsp;</td>
         </tr>
         <tr>
-            <td align="right">Old Password</td>
+            <td align="right">Old </td>
             <td>
                 <asp:TextBox ID="txtOldPwd" runat="server" TextMode="Password"></asp:TextBox>
             </td>
         </tr>
         <tr>
-            <td align="right">New Password</td>
+            <td align="right">New</td>
             <td>
                 <asp:TextBox ID="txtNewPwd" runat="server" TextMode="Password"></asp:TextBox>
+            </td>
+        </tr>
+        <tr>
+            <td align="right">Re-type new</td>
+            <td>
+                <asp:TextBox ID="txtRetypePwd" runat="server" TextMode="Password"></asp:TextBox>
             </td>
         </tr>
         <tr>
@@ -28,7 +34,9 @@
         </tr>
         <tr>
             <td>&nbsp;</td>
-            <td>&nbsp;</td>
+            <td>
+                <asp:Label ID="lblStatus" runat="server"></asp:Label>
+            </td>
         </tr>
     </table>
 </asp:Content>
