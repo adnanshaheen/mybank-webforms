@@ -30,6 +30,7 @@
                 <asp:MenuItem NavigateUrl="~/XferHistory.aspx" Text="Transfer History" 
                     Value="Transfer History"></asp:MenuItem>
                 <asp:MenuItem NavigateUrl="~/ChangePwd.aspx" Text="Change Password" Value="Change Password"></asp:MenuItem>
+                <asp:MenuItem NavigateUrl="~/Logout.aspx" Text="Logout" Value="Logout"></asp:MenuItem>
             </Items>
             <StaticHoverStyle BackColor="#FFCC66" BorderColor="#FF0066" BorderStyle="Solid" 
                 BorderWidth="1px" />
