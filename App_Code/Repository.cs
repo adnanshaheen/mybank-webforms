@@ -118,7 +118,7 @@ public class Repository : IRepositoryDataAuthentication, IRepositoryDataAccount
             
             // clear cache for TransferHistory
             string key = String.Format("TransferHistory_{0}",
-    chkAcctNum);
+                chkAcctNum);
             webCache.Remove(key);
         }
         catch (Exception ex)
