@@ -17,11 +17,17 @@ public class BusinessLayer : IBusinessAuthentication, IBusinessAccount
         idac = idacc;
     }
 
-    public BusinessLayer():
-        this(GenericFactory<Repository, IRepositoryDataAuthentication>.CreateInstance(),
-    GenericFactory<Repository, IRepositoryDataAccount>.CreateInstance())
-	{
- 	}
+    //public BusinessLayer():
+    //    this(GenericFactory<Repository, IRepositoryDataAuthentication>.CreateInstance(),
+    //GenericFactory<Repository, IRepositoryDataAccount>.CreateInstance())
+    //{
+    //}
+
+    public BusinessLayer() :
+        this(GenericFactory<RepositoryMySql, IRepositoryDataAuthentication>.CreateInstance(),
+         GenericFactory<RepositoryMySql, IRepositoryDataAccount>.CreateInstance())
+    {
+    }
 
     #region IAuthentication Members
 
