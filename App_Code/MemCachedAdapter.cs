@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Couchbase;
+using Enyim.Caching.Memcached;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -11,20 +13,21 @@ public class MemCachedAdapter : IWebCache
     // for Memcached product
     #region IWebCache Members
 
+    private CouchbaseClient client = new CouchbaseClient();
+
     public void Remove(string key)
     {
-        //throw new NotImplementedException();
+        client.Remove(key);
     }
 
     public void Store(string key, object obj)
     {
-        //throw new NotImplementedException();
+        client.Store(StoreMode.Set, key, obj, TimeSpan.FromMinutes(1));
     }
 
     public T Retrieve<T>(string key)
     {
-        return default(T);
-        //throw new NotImplementedException();
+        return client.Get<T>(key);
     }
 
     #endregion
