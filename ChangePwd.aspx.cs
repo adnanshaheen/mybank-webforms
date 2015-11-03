@@ -17,7 +17,8 @@ public partial class ChangePwd : System.Web.UI.Page
     }
     protected void btnChangePwd_Click(object sender, EventArgs e)
     {
-        IBusinessAuthentication iau = GenericFactory<BusinessLayer, IBusinessAuthentication>.CreateInstance();
+        IBusinessAbstraction iba = GenericFactory<BusinessAbstraction, IBusinessAbstraction>.CreateInstance();
+
         try
         {
             string oldPwd = Utils.StripPunctuation(txtOldPwd.Text);
@@ -26,10 +27,10 @@ public partial class ChangePwd : System.Web.UI.Page
             if (rePwd.Equals(newPwd))
             {
                 string userName = Utils.StripPunctuation(SessionFacade.USERNAME);
-                string chkAcctNum = iau.IsValidUser(userName, oldPwd);
+                string chkAcctNum = iba.IsValidUser(userName, oldPwd);
                 if (chkAcctNum != "")
                 {
-                    if (iau.ChangePassword(userName, oldPwd, newPwd))
+                    if (iba.ChangePassword(userName, oldPwd, newPwd))
                         lblStatus.Text = "Password updated successfully!";
                     else
                         lblStatus.Text = "Couldn't change password!!!";

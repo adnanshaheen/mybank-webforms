@@ -14,10 +14,10 @@ public partial class Login : System.Web.UI.Page
 
     protected void btnLogin_Click(object sender, EventArgs e)
     {
-        IBusinessAuthentication iau = GenericFactory<BusinessLayer, IBusinessAuthentication>.CreateInstance();
+        IBusinessAbstraction iba = GenericFactory<BusinessAbstraction, IBusinessAbstraction>.CreateInstance();
         try
         {
-            string chkAcctNum = iau.IsValidUser(Utils.StripPunctuation(txtUsername.Text), 
+            string chkAcctNum = iba.IsValidUser(Utils.StripPunctuation(txtUsername.Text),
                 Utils.StripPunctuation(txtPassword.Text));
             
             if (chkAcctNum != "")

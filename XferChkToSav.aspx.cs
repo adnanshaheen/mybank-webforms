@@ -15,7 +15,7 @@ public partial class XferChkToSav : System.Web.UI.Page
             Response.Redirect("Login.aspx");
         }
 
-        IBusinessAccount iba = GenericFactory<BusinessLayer, IBusinessAccount>.CreateInstance();
+        IBusinessAbstraction iba = GenericFactory<BusinessAbstraction, IBusinessAbstraction>.CreateInstance();
         string chkAcctNum = SessionFacade.CHECKINGACCTNUM;
         string savAcctNum = chkAcctNum + "1";
         lblCheckingBalance.Text = iba.GetCheckingBalance(chkAcctNum).ToString();
@@ -23,7 +23,7 @@ public partial class XferChkToSav : System.Web.UI.Page
     }
     protected void btnTransfer_Click(object sender, EventArgs e)
     {
-        IBusinessAccount iba = GenericFactory<BusinessLayer, IBusinessAccount>.CreateInstance();
+        IBusinessAbstraction iba = GenericFactory<BusinessAbstraction, IBusinessAbstraction>.CreateInstance();
         try
         {
             string chkAcctNum = SessionFacade.CHECKINGACCTNUM;

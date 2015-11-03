@@ -24,7 +24,7 @@ public partial class XferHistory : System.Web.UI.Page
     {
         try
         {
-            IBusinessAccount iba = GenericFactory<BusinessLayer, IBusinessAccount>.CreateInstance();
+            IBusinessAbstraction iba = GenericFactory<BusinessAbstraction, IBusinessAbstraction>.CreateInstance();
             List<TransferHistory> TList = iba.GetTransferHistory(chkAcctNum);
             gv1.DataSource = TList;
             gv1.DataBind();
