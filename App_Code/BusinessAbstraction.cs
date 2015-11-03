@@ -18,17 +18,17 @@ public class BusinessAbstraction : IBusinessAbstraction
         _idau = idau;
 	}
 
-    public BusinessAbstraction() :
-        this(GenericFactory<Repository, IRepositoryDataAuthentication>.CreateInstance(),
-        GenericFactory<Repository, IRepositoryDataAccount>.CreateInstance())
-    {
-    }
-
     //public BusinessAbstraction() :
-    //    this(GenericFactory<RepositoryMySql, IRepositoryDataAuthentication>.CreateInstance(),
-    //     GenericFactory<RepositoryMySql, IRepositoryDataAccount>.CreateInstance())
+    //    this(GenericFactory<Repository, IRepositoryDataAuthentication>.CreateInstance(),
+    //    GenericFactory<Repository, IRepositoryDataAccount>.CreateInstance())
     //{
     //}
+
+    public BusinessAbstraction() :
+        this(GenericFactory<RepositoryMySql, IRepositoryDataAuthentication>.CreateInstance(),
+         GenericFactory<RepositoryMySql, IRepositoryDataAccount>.CreateInstance())
+    {
+    }
 
     #region IAuthentication Members
 
