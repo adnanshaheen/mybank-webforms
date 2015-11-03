@@ -11,9 +11,14 @@ using System.Web;
 public class MemCachedAdapter : IWebCache
 {
     // for Memcached product
-    #region IWebCache Members
+    private CouchbaseClient client = null;
 
-    private CouchbaseClient client = new CouchbaseClient();
+    public MemCachedAdapter()
+    {
+        client = new CouchbaseClient();
+    }
+
+    #region IWebCache Members
 
     public void Remove(string key)
     {
