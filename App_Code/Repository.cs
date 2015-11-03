@@ -61,8 +61,65 @@ public class Repository : IRepositoryDataAuthentication, IRepositoryDataAccount
 
     public bool TransferChkToSav(string chkAcctNum, string savAcctNum, double amt)
     {
-        // to do
-        return true;
+        bool res = false;
+        try
+        {
+            double bal = GetCheckingBalance(chkAcctNum);
+            if (bal > 0)
+            {
+                List<SqlParameter> PList = new List<SqlParameter>();
+                double newBal = bal - amt;
+                string sql = "Update CheckingAccounts set Balance=@newBal where CheckingAccountNumber=@ChkAcctNum";
+                SqlParameter p1 = new SqlParameter("@newBal", SqlDbType.Decimal);
+                p1.Value = newBal;
+                PList.Add(p1);
+
+                SqlParameter p2 = new SqlParameter("@ChkAcctNum", SqlDbType.VarChar, 50);
+                p2.Value = chkAcctNum;
+                PList.Add(p2);
+
+                if (_idataAccess.InsOrUpdOrDel(sql, PList) > 0) // technically it should return 1
+                {
+                    //double.Parse(obj.ToString());
+                    newBal = GetSavingBalance(savAcctNum) + amt;
+                    sql = "Update SavingAccounts set Balance=@newBal where SavingAccountNumber=@SavAcctNum";
+
+                    PList.Clear();              // clear plist to reuse
+                    p1.Value = newBal;          // since p1 is same type of money, we can reuse it
+                    PList.Add(p1);
+
+                    SqlParameter p3 = new SqlParameter("@SavAcctNum", SqlDbType.VarChar, 50);
+                    p3.Value = savAcctNum;      // since p2 is same type of varchar, we can reuse it
+                    PList.Add(p3);
+
+                    if (_idataAccess.InsOrUpdOrDel(sql, PList) > 0) // it should return 1
+                    {
+                        sql = "insert into TransferHistory(FromAccountNum, ToAccountNum, Amount, CheckingAccountNumber)" +
+                            "values (@ChkAcctNum, @SavAcctNum, @amt, @ChkAcctNum)";
+
+                        PList.Clear();
+
+                        p2.Value = chkAcctNum;
+                        PList.Add(p2);
+
+                        p3.Value = savAcctNum;
+                        PList.Add(p3);
+
+                        SqlParameter p4 = new SqlParameter("@amt", SqlDbType.VarChar, 50);
+                        p4.Value = amt;
+                        PList.Add(p4);
+
+                        res = _idataAccess.InsOrUpdOrDel(sql, PList) > 0 ? true : false;
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        return res;
     }
 
     public double GetCheckingBalance(string chkAcctNum)

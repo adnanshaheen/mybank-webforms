@@ -48,7 +48,7 @@ public class BusinessAbstraction : IBusinessAbstraction
 
     public bool TransferFromChkgToSav(string chkAcctNum, string savAcctNum, double amt)
     {
-        return _idac.TransferChkToSavViaSP(chkAcctNum,savAcctNum,amt);
+        return _idac.TransferChkToSav(chkAcctNum,savAcctNum,amt);
     }
 
     #endregion
