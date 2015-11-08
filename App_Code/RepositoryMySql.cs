@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Web;
 
@@ -11,17 +12,17 @@ using System.Web;
 /// </summary>
 public class RepositoryMySql : IRepositoryDataAccount, IRepositoryDataAuthentication
 {
-    IDataAccessMySql _idataAccess = null;
+    IDataAccess _idataAccess = null;
     CacheAbstraction webCache = null;
 
-	public RepositoryMySql(IDataAccessMySql idac, CacheAbstraction webc)
+	public RepositoryMySql(IDataAccess idac, CacheAbstraction webc)
 	{
         _idataAccess = idac;
         webCache = webc;
 	}
 
     public RepositoryMySql()
-        : this(GenericFactory<DataAccessMySql, IDataAccessMySql>.CreateInstance(),
+        : this(GenericFactory<DataAccessMySql, IDataAccess>.CreateInstance(),
         new CacheAbstraction())
     {
     }
@@ -35,11 +36,11 @@ public class RepositoryMySql : IRepositoryDataAccount, IRepositoryDataAuthentica
         {
             string sql = "select CheckingAccountNum from users where " +
                 "Username=@uname and Password=@pwd";
-            List<MySqlParameter> PList = new List<MySqlParameter>();
-            MySqlParameter p1 = new MySqlParameter("@uname", MySqlDbType.VarChar, 50);
+            List<DbParameter> PList = new List<DbParameter>();
+            DbParameter p1 = new MySqlParameter("@uname", MySqlDbType.VarChar, 50);
             p1.Value = uname;
             PList.Add(p1);
-            MySqlParameter p2 = new MySqlParameter("@pwd", MySqlDbType.VarChar, 50);
+            DbParameter p2 = new MySqlParameter("@pwd", MySqlDbType.VarChar, 50);
             p2.Value = pwd;
             PList.Add(p2);
             object obj = _idataAccess.GetSingleAnswer(sql, PList);
@@ -61,19 +62,23 @@ public class RepositoryMySql : IRepositoryDataAccount, IRepositoryDataAuthentica
     public bool TransferChkToSav(string chkAcctNum, string savAcctNum, double amt)
     {
         bool res = false;
+        string CONNSTR = ConfigurationManager.ConnectionStrings["BANKMYSQLCONN"].ConnectionString;
+        MySqlConnection conn = new MySqlConnection(CONNSTR);
+        MySqlTransaction Transection = conn.BeginTransaction();
+
         try
         {
             double bal = GetCheckingBalance(chkAcctNum);
             if (bal > 0)
             {
-                List<MySqlParameter> PList = new List<MySqlParameter>();
+                List<DbParameter> PList = new List<DbParameter>();
                 double newBal = bal - amt;
                 string sql = "Update CheckingAccounts set Balance=@newBal where CheckingAccountNumber=@ChkAcctNum";
-                MySqlParameter p1 = new MySqlParameter("@newBal", MySqlDbType.Decimal);
+                DbParameter p1 = new MySqlParameter("@newBal", MySqlDbType.Decimal);
                 p1.Value = newBal;
                 PList.Add(p1);
 
-                MySqlParameter p2 = new MySqlParameter("@ChkAcctNum", MySqlDbType.VarChar, 50);
+                DbParameter p2 = new MySqlParameter("@ChkAcctNum", MySqlDbType.VarChar, 50);
                 p2.Value = chkAcctNum;
                 PList.Add(p2);
 
@@ -87,7 +92,7 @@ public class RepositoryMySql : IRepositoryDataAccount, IRepositoryDataAuthentica
                     p1.Value = newBal;          // since p1 is same type of money, we can reuse it
                     PList.Add(p1);
 
-                    MySqlParameter p3 = new MySqlParameter("@SavAcctNum", MySqlDbType.VarChar, 50);
+                    DbParameter p3 = new MySqlParameter("@SavAcctNum", MySqlDbType.VarChar, 50);
                     p3.Value = savAcctNum;      // since p2 is same type of varchar, we can reuse it
                     PList.Add(p3);
 
@@ -104,18 +109,25 @@ public class RepositoryMySql : IRepositoryDataAccount, IRepositoryDataAuthentica
                         p3.Value = savAcctNum;
                         PList.Add(p3);
 
-                        MySqlParameter p4 = new MySqlParameter("@amt", MySqlDbType.VarChar, 50);
+                        DbParameter p4 = new MySqlParameter("@amt", MySqlDbType.VarChar, 50);
                         p4.Value = amt;
                         PList.Add(p4);
 
                         res = _idataAccess.InsOrUpdOrDel(sql, PList) > 0 ? true : false;
+                        if (res == true)
+                            Transection.Commit();
                     }
                 }
             }
         }
         catch (Exception ex)
         {
+            Transection.Rollback();
             throw ex;
+        }
+        finally
+        {
+            Transection.Dispose();
         }
 
         return res;
@@ -128,8 +140,8 @@ public class RepositoryMySql : IRepositoryDataAccount, IRepositoryDataAuthentica
         {
             string sql = "select Balance from CheckingAccounts where " +
                 "CheckingAccountNumber=@chkAcctNum";
-            List<MySqlParameter> PList = new List<MySqlParameter>();
-            MySqlParameter p1 = new MySqlParameter("@chkAcctNum", MySqlDbType.VarChar, 50);
+            List<DbParameter> PList = new List<DbParameter>();
+            DbParameter p1 = new MySqlParameter("@chkAcctNum", MySqlDbType.VarChar, 50);
             p1.Value = chkAcctNum;
             PList.Add(p1);
             object obj = _idataAccess.GetSingleAnswer(sql, PList);
@@ -188,8 +200,8 @@ public class RepositoryMySql : IRepositoryDataAccount, IRepositoryDataAuthentica
         {
             string sql = "select Balance from SavingAccounts where " +
                 "SavingAccountNumber=@savAcctNum";
-            List<MySqlParameter> PList = new List<MySqlParameter>();
-            MySqlParameter p1 = new MySqlParameter("@savAcctNum", MySqlDbType.VarChar, 50);
+            List<DbParameter> PList = new List<DbParameter>();
+            DbParameter p1 = new MySqlParameter("@savAcctNum", MySqlDbType.VarChar, 50);
             p1.Value = savAcctNum;
             PList.Add(p1);
             object obj = _idataAccess.GetSingleAnswer(sql, PList);
@@ -246,8 +258,8 @@ public class RepositoryMySql : IRepositoryDataAccount, IRepositoryDataAuthentica
         {
             string sql = "select * from TransferHistory where " +
                 "CheckingAccountNumber=@chkAcctNum";
-            List<MySqlParameter> PList = new List<MySqlParameter>();
-            MySqlParameter p1 = new MySqlParameter("@chkAcctNum", MySqlDbType.VarChar, 50);
+            List<DbParameter> PList = new List<DbParameter>();
+            DbParameter p1 = new MySqlParameter("@chkAcctNum", MySqlDbType.VarChar, 50);
             p1.Value = chkAcctNum;
             PList.Add(p1);
             dt = _idataAccess.GetDataTable(sql, PList);
@@ -268,14 +280,14 @@ public class RepositoryMySql : IRepositoryDataAccount, IRepositoryDataAuthentica
             res = IsValidUser(uname, oldPW);
             string sql = "update Users set Password=@newPW where " +
                 "Username=@uname and Password=@oldPW";
-            List<MySqlParameter> PList = new List<MySqlParameter>();
-            MySqlParameter p1 = new MySqlParameter("@uname", MySqlDbType.VarChar, 50);
+            List<DbParameter> PList = new List<DbParameter>();
+            DbParameter p1 = new MySqlParameter("@uname", MySqlDbType.VarChar, 50);
             p1.Value = uname;
             PList.Add(p1);
-            MySqlParameter p2 = new MySqlParameter("@oldPW", MySqlDbType.VarChar, 50);
+            DbParameter p2 = new MySqlParameter("@oldPW", MySqlDbType.VarChar, 50);
             p2.Value = oldPW;
             PList.Add(p2);
-            MySqlParameter p3 = new MySqlParameter("@newPW", MySqlDbType.VarChar, 50);
+            DbParameter p3 = new MySqlParameter("@newPW", MySqlDbType.VarChar, 50);
             p3.Value = newPW;
             PList.Add(p3);
             object obj = _idataAccess.GetSingleAnswer(sql, PList);

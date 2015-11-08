@@ -10,7 +10,7 @@ using System.Data;
 /// <summary>
 /// Summary description for DataAccessMySql
 /// </summary>
-public class DataAccessMySql : IDataAccessMySql
+public class DataAccessMySql : IDataAccess
 {
     private string CONNSTR = ConfigurationManager.ConnectionStrings["BANKMYSQLCONN"].ConnectionString;
     // To ignore mistakes, shouldn't we use another Facade Design pattern and have another class
@@ -22,7 +22,7 @@ public class DataAccessMySql : IDataAccessMySql
 
     #region IDataAccess Members
 
-    public object GetSingleAnswer(string sql, List<MySqlParameter> PList)
+    public object GetSingleAnswer(string sql, List<DbParameter> PList)
     {
         object obj = null;
         MySqlConnection conn = new MySqlConnection(CONNSTR);
@@ -30,7 +30,7 @@ public class DataAccessMySql : IDataAccessMySql
         {
             conn.Open();
             MySqlCommand cmd = new MySqlCommand(sql, conn);
-            foreach (MySqlParameter p in PList)
+            foreach (DbParameter p in PList)
                 cmd.Parameters.Add(p);
             obj = cmd.ExecuteScalar();
         }
@@ -45,7 +45,7 @@ public class DataAccessMySql : IDataAccessMySql
         return obj;
     }
 
-    public DataTable GetDataTable(string sql, List<MySqlParameter> PList)
+    public DataTable GetDataTable(string sql, List<DbParameter> PList)
     {
         DataTable dt = new DataTable();
         MySqlConnection conn = new MySqlConnection(CONNSTR);
@@ -54,7 +54,7 @@ public class DataAccessMySql : IDataAccessMySql
             conn.Open();
             MySqlDataAdapter da = new MySqlDataAdapter();
             MySqlCommand cmd = new MySqlCommand(sql, conn);
-            foreach (MySqlParameter p in PList)
+            foreach (DbParameter p in PList)
                 cmd.Parameters.Add(p);
             da.SelectCommand = cmd;
             da.Fill(dt);
@@ -70,7 +70,7 @@ public class DataAccessMySql : IDataAccessMySql
         return dt;
     }
 
-    public int InsOrUpdOrDel(string sql, List<MySqlParameter> PList)
+    public int InsOrUpdOrDel(string sql, List<DbParameter> PList)
     {
         int rows = 0;
         MySqlConnection conn = new MySqlConnection(CONNSTR);
@@ -78,7 +78,7 @@ public class DataAccessMySql : IDataAccessMySql
         {
             conn.Open();
             MySqlCommand cmd = new MySqlCommand(sql, conn);
-            foreach (MySqlParameter p in PList)
+            foreach (DbParameter p in PList)
                 cmd.Parameters.Add(p);
             rows = cmd.ExecuteNonQuery();
         }

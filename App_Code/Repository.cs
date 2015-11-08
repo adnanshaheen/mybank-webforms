@@ -5,6 +5,7 @@ using System.Web;
 using System.Data.SqlClient;
 using System.Configuration;
 using System.Data;
+using System.Data.Common;
 
 /// <summary>
 /// Summary description for DataLayer
@@ -36,11 +37,11 @@ public class Repository : IRepositoryDataAuthentication, IRepositoryDataAccount
         {
             string sql = "select CheckingAccountNum from Users where " +
                 "Username=@uname and Password=@pwd";
-            List<SqlParameter> PList = new List<SqlParameter>();
-            SqlParameter p1 = new SqlParameter("@uname", SqlDbType.VarChar, 50);
+            List<DbParameter> PList = new List<DbParameter>();
+            DbParameter p1 = new SqlParameter("@uname", SqlDbType.VarChar, 50);
             p1.Value = uname;
             PList.Add(p1);
-            SqlParameter p2 = new SqlParameter("@pwd", SqlDbType.VarChar, 50);
+            DbParameter p2 = new SqlParameter("@pwd", SqlDbType.VarChar, 50);
             p2.Value = pwd;
             PList.Add(p2);
             object obj = _idataAccess.GetSingleAnswer(sql, PList);
@@ -62,19 +63,23 @@ public class Repository : IRepositoryDataAuthentication, IRepositoryDataAccount
     public bool TransferChkToSav(string chkAcctNum, string savAcctNum, double amt)
     {
         bool res = false;
+        string CONNSTR = ConfigurationManager.ConnectionStrings["BANKDBCONN"].ConnectionString;
+        SqlConnection conn = new SqlConnection(CONNSTR);
+        SqlTransaction Transection = conn.BeginTransaction();
+
         try
         {
             double bal = GetCheckingBalance(chkAcctNum);
             if (bal > 0)
             {
-                List<SqlParameter> PList = new List<SqlParameter>();
+                List<DbParameter> PList = new List<DbParameter>();
                 double newBal = bal - amt;
                 string sql = "Update CheckingAccounts set Balance=@newBal where CheckingAccountNumber=@ChkAcctNum";
-                SqlParameter p1 = new SqlParameter("@newBal", SqlDbType.Decimal);
+                DbParameter p1 = new SqlParameter("@newBal", SqlDbType.Decimal);
                 p1.Value = newBal;
                 PList.Add(p1);
 
-                SqlParameter p2 = new SqlParameter("@ChkAcctNum", SqlDbType.VarChar, 50);
+                DbParameter p2 = new SqlParameter("@ChkAcctNum", SqlDbType.VarChar, 50);
                 p2.Value = chkAcctNum;
                 PList.Add(p2);
 
@@ -88,7 +93,7 @@ public class Repository : IRepositoryDataAuthentication, IRepositoryDataAccount
                     p1.Value = newBal;          // since p1 is same type of money, we can reuse it
                     PList.Add(p1);
 
-                    SqlParameter p3 = new SqlParameter("@SavAcctNum", SqlDbType.VarChar, 50);
+                    DbParameter p3 = new SqlParameter("@SavAcctNum", SqlDbType.VarChar, 50);
                     p3.Value = savAcctNum;      // since p2 is same type of varchar, we can reuse it
                     PList.Add(p3);
 
@@ -105,18 +110,25 @@ public class Repository : IRepositoryDataAuthentication, IRepositoryDataAccount
                         p3.Value = savAcctNum;
                         PList.Add(p3);
 
-                        SqlParameter p4 = new SqlParameter("@amt", SqlDbType.VarChar, 50);
+                        DbParameter p4 = new SqlParameter("@amt", SqlDbType.VarChar, 50);
                         p4.Value = amt;
                         PList.Add(p4);
 
                         res = _idataAccess.InsOrUpdOrDel(sql, PList) > 0 ? true : false;
+                        if (res == true)
+                            Transection.Commit();
                     }
                 }
             }
         }
         catch (Exception ex)
         {
+            Transection.Rollback();
             throw ex;
+        }
+        finally
+        {
+            Transection.Dispose();
         }
 
         return res;
@@ -129,8 +141,8 @@ public class Repository : IRepositoryDataAuthentication, IRepositoryDataAccount
         {
             string sql = "select Balance from CheckingAccounts where " +
                 "CheckingAccountNumber=@chkAcctNum";
-            List<SqlParameter> PList = new List<SqlParameter>();
-            SqlParameter p1 = new SqlParameter("@chkAcctNum", SqlDbType.VarChar, 50);
+            List<DbParameter> PList = new List<DbParameter>();
+            DbParameter p1 = new SqlParameter("@chkAcctNum", SqlDbType.VarChar, 50);
             p1.Value = chkAcctNum;
             PList.Add(p1);
             object obj = _idataAccess.GetSingleAnswer(sql,PList);
@@ -193,8 +205,8 @@ public class Repository : IRepositoryDataAuthentication, IRepositoryDataAccount
         {
             string sql = "select Balance from SavingAccounts where " +
                 "SavingAccountNumber=@savAcctNum";
-            List<SqlParameter> PList = new List<SqlParameter>();
-            SqlParameter p1 = new SqlParameter("@savAcctNum", SqlDbType.VarChar, 50);
+            List<DbParameter> PList = new List<DbParameter>();
+            DbParameter p1 = new SqlParameter("@savAcctNum", SqlDbType.VarChar, 50);
             p1.Value = savAcctNum;
             PList.Add(p1);
             object obj = _idataAccess.GetSingleAnswer(sql,PList);
@@ -251,8 +263,8 @@ public class Repository : IRepositoryDataAuthentication, IRepositoryDataAccount
         {
             string sql = "select * from TransferHistory where " +
                 "CheckingAccountNumber=@chkAcctNum";
-            List<SqlParameter> PList = new List<SqlParameter>();
-            SqlParameter p1 = new SqlParameter("@chkAcctNum", SqlDbType.VarChar, 50);
+            List<DbParameter> PList = new List<DbParameter>();
+            DbParameter p1 = new SqlParameter("@chkAcctNum", SqlDbType.VarChar, 50);
             p1.Value = chkAcctNum;
             PList.Add(p1);
             dt = _idataAccess.GetDataTable(sql,PList);
@@ -273,14 +285,14 @@ public class Repository : IRepositoryDataAuthentication, IRepositoryDataAccount
             res = IsValidUser(uname, oldPW);
             string sql = "update Users set Password=@newPW where " +
                 "Username=@uname and Password=@oldPW";
-            List<SqlParameter> PList = new List<SqlParameter>();
-            SqlParameter p1 = new SqlParameter("@uname", SqlDbType.VarChar, 50);
+            List<DbParameter> PList = new List<DbParameter>();
+            DbParameter p1 = new SqlParameter("@uname", SqlDbType.VarChar, 50);
             p1.Value = uname;
             PList.Add(p1);
-            SqlParameter p2 = new SqlParameter("@oldPW", SqlDbType.VarChar, 50);
+            DbParameter p2 = new SqlParameter("@oldPW", SqlDbType.VarChar, 50);
             p2.Value = oldPW;
             PList.Add(p2);
-            SqlParameter p3 = new SqlParameter("@newPW", SqlDbType.VarChar, 50);
+            DbParameter p3 = new SqlParameter("@newPW", SqlDbType.VarChar, 50);
             p3.Value = newPW;
             PList.Add(p3);
             object obj = _idataAccess.GetSingleAnswer(sql, PList);

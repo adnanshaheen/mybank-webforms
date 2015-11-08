@@ -5,6 +5,7 @@ using System.Web;
 using System.Data.SqlClient;
 using System.Data;
 using System.Configuration;
+using System.Data.Common;
 
 /// <summary>
 /// Summary description for DataAccess
@@ -20,7 +21,7 @@ public class DataAccess : IDataAccess
 
     #region IDataAccess Members
 
-    public object GetSingleAnswer(string sql, List<SqlParameter> PList)
+    public object GetSingleAnswer(string sql, List<DbParameter> PList)
     {
         object obj = null;
         SqlConnection conn = new SqlConnection(CONNSTR);
@@ -28,7 +29,7 @@ public class DataAccess : IDataAccess
         {
             conn.Open();
             SqlCommand cmd = new SqlCommand(sql, conn);
-            foreach (SqlParameter p in PList)
+            foreach (DbParameter p in PList)
                 cmd.Parameters.Add(p);
             obj = cmd.ExecuteScalar(); 
         }
@@ -43,7 +44,7 @@ public class DataAccess : IDataAccess
         return obj;
     }
 
-    public System.Data.DataTable GetDataTable(string sql, List<SqlParameter> PList)
+    public System.Data.DataTable GetDataTable(string sql, List<DbParameter> PList)
     {
         DataTable dt = new DataTable();
         SqlConnection conn = new SqlConnection(CONNSTR);
@@ -52,7 +53,7 @@ public class DataAccess : IDataAccess
             conn.Open();
             SqlDataAdapter da = new SqlDataAdapter();
             SqlCommand cmd = new SqlCommand(sql, conn);
-            foreach (SqlParameter p in PList)
+            foreach (DbParameter p in PList)
                 cmd.Parameters.Add(p);
             da.SelectCommand = cmd;
             da.Fill(dt);
@@ -68,7 +69,7 @@ public class DataAccess : IDataAccess
         return dt;
     }
 
-    public int InsOrUpdOrDel(string sql, List<SqlParameter> PList)
+    public int InsOrUpdOrDel(string sql, List<DbParameter> PList)
     {
         int rows = 0;
         SqlConnection conn = new SqlConnection(CONNSTR);
@@ -76,7 +77,7 @@ public class DataAccess : IDataAccess
         {
             conn.Open();
             SqlCommand cmd = new SqlCommand(sql, conn);
-            foreach (SqlParameter p in PList)
+            foreach (DbParameter p in PList)
                 cmd.Parameters.Add(p);
             rows = cmd.ExecuteNonQuery();
         }
